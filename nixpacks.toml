@@ -1,0 +1,9 @@
+[phases.setup]
+nixPkgs = ["nodejs-20_x", "python3", "gcc", "gnumake", "pkg-config", "libusb1"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[variables]
+PYTHON = "python3"
+PKG_CONFIG_PATH = "/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
