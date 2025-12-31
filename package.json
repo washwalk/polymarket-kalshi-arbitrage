@@ -1,4 +1,7 @@
 {
   "private": true,
-  "workspaces": ["apps/*"]
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "start": "npm run build --workspace=apps/web && npm run start --workspace=apps/web"
+  }
 }
