@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "btc_2024",
+    "poly_id": "0xabc123",
+    "kalshi_ticker": "BTC-USD-DEC2024",
+    "outcome": "YES"
+  },
+  {
+    "slug": "us_pres_2024_biden",
+    "poly_id": "0xdef456",
+    "kalshi_ticker": "PRES-2024-BIDEN",
+    "outcome": "YES"
+  }
+]

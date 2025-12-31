@@ -1,0 +1,22 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npm run start"
+  },
+  "services": [
+    {
+      "name": "web",
+      "source": {
+        "root": "apps/web"
+      }
+    },
+    {
+      "name": "bot",
+      "source": {
+        "root": "apps/bot"
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: var(--font-inter), 'Inter', sans-serif;
+    --font-mono: var(--font-mono), 'JetBrains Mono', monospace;
+  }
+}
+
+:root {
+    --grid-color: rgba(255, 255, 255, 0.03);
+}
+
+body {
+    background-color: #0a0a0a;
+    background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
