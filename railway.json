@@ -1,17 +1,24 @@
 {
   "$schema": "https://railway.app/standard-schema.json",
   "build": {
-    "builder": "RAILPACK",
-    "railpackConfig": {
-      "aptPackages": [
-        "python3",
-        "python-is-python3",
-        "build-essential"
-      ]
-    }
+    "builder": "RAILPACK"
   },
-  "deploy": {
-    "startCommand": "npm run start"
+  "services": {
+    "web": {
+      "source": {
+        "root": "apps/web"
+      },
+      "variables": {
+        "RAILPACK_APT_PACKAGES": "python3 python-is-python3 build-essential gcc make",
+        "PYTHON": "/usr/bin/python3",
+        "NIXPACKS_NODE_VERSION": "20"
+      }
+    },
+    "bot": {
+      "source": {
+        "root": "apps/bot"
+      }
+    }
   },
   "services": [
     {
