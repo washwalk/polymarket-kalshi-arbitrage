@@ -1,15 +1,6 @@
 {
-  "$schema": "https://railway.app/standard-schema.json",
   "build": {
-    "builder": "RAILPACK",
-    "railpackConfig": {
-      "aptPackages": [
-        "python3",
-        "build-essential",
-        "gcc",
-        "make"
-      ]
-    }
+    "builder": "NIXPACKS"
   },
   "deploy": {
     "startCommand": "npm run start"
