@@ -6,9 +6,7 @@
       "aptPackages": [
         "python3",
         "python-is-python3",
-        "build-essential",
-        "gcc",
-        "make"
+        "build-essential"
       ]
     }
   },
