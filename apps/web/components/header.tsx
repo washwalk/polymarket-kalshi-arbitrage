@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import dynamic from 'next/dynamic';
+
+// Dynamically import WalletMultiButton to avoid SSR hydration issues
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 export default function Header() {
     const pathname = usePathname();
 
     // Automatically determines the label based on the current URL
     const getPageLabel = () => {
-        if (pathname.startsWith("/burner")) return "Burner";
-        if (pathname.startsWith("/clik")) return "Clik";
-        return "Lab"; // Fallback for homepage
+        if (pathname.startsWith("/arbitrage")) return "Arbitrage";
+        return "Dashboard"; // Fallback for homepage
     };
 
     return (
@@ -32,19 +38,9 @@ export default function Header() {
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="flex gap-6 text-sm font-medium">
-                    <Link
-                        href="/burner"
-                        className={`transition-colors hover:text-emerald-500 ${pathname.startsWith('/burner') ? 'text-emerald-500' : 'text-neutral-400'}`}
-                    >
-                        Burner
-                    </Link>
-                    <Link
-                        href="/clik"
-                        className={`transition-colors hover:text-emerald-500 ${pathname.startsWith('/clik') ? 'text-emerald-500' : 'text-neutral-400'}`}
-                    >
-                        Clik
-                    </Link>
+                <nav className="flex gap-6 text-sm font-medium items-center">
+                    {/* This button handles the Solflare connection automatically */}
+                    <WalletMultiButton />
                 </nav>
             </div>
         </header>
