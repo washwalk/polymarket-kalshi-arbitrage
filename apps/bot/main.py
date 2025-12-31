@@ -21,8 +21,7 @@ app.add_middleware(
 )
 
 redis_client = Redis.from_url(
-    os.getenv('UPSTASH_REDIS_REST_URL'),
-    password=os.getenv('UPSTASH_REDIS_REST_TOKEN'),
+    os.environ.get("REDIS_URL", "redis://localhost:6379"),
     decode_responses=True
 )
 
@@ -42,11 +41,16 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            # Get latest signals from Redis
-            signals_data = redis_client.get('arb:signals')
+            # Get all arbitrage signals from Redis
+            keys = redis_client.keys('arb:*')
+            signals = []
+            for key in keys:
+                data = redis_client.get(key)
+                if data:
+                    signals.append(json.loads(data))
             import datetime
             payload = {
-                "signals": json.loads(signals_data) if signals_data else [],
+                "signals": signals,
                 "lastScanned": datetime.datetime.utcnow().isoformat()
             }
             await websocket.send_json(payload)

@@ -7,4 +7,5 @@ python-dotenv
 httpx
 py-clob-client
 thefuzz[speedup]
-kalshi-python
+solders
+solana

@@ -24,7 +24,7 @@ interface ArbitrageState {
   connected: boolean;
 }
 
-const WS_URL = 'wss://wodah.com/ws/signals';
+const WS_URL = 'ws://localhost:8000/ws/signals';
 
 export function useArbitrage(): ArbitrageState {
   const [signals, setSignals] = useState<ArbitrageSignal[]>([]);

@@ -1,7 +1,8 @@
 import os
 import requests
 
-BASE_URL = "https://clob.polymarket.com"
+GAMMA_URL = "https://gamma-api.polymarket.com"
+CLOB_URL = "https://clob.polymarket.com"
 
 def auth_headers():
     return {
@@ -12,8 +13,7 @@ def auth_headers():
 
 def fetch_markets():
     resp = requests.get(
-        f"{BASE_URL}/markets",
-        headers=auth_headers(),
+        f"{GAMMA_URL}/markets?closed=false&limit=10",
         timeout=10,
     )
     resp.raise_for_status()
@@ -21,7 +21,7 @@ def fetch_markets():
 
 def fetch_orderbook(token_id):
     resp = requests.get(
-        f"{BASE_URL}/orderbook/{token_id}",
+        f"{CLOB_URL}/orderbook/{token_id}",
         headers=auth_headers(),
         timeout=10,
     )
