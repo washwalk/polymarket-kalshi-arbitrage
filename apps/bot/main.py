@@ -49,8 +49,10 @@ async def health_check():
 @app.websocket("/ws/signals")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    counter = 0
     try:
         while True:
+            counter += 1
             # Get all arbitrage signals from Redis
             keys = redis_client.keys('arb:*')
             signals = []
@@ -58,11 +60,19 @@ async def websocket_endpoint(websocket: WebSocket):
                 data = redis_client.get(key)
                 if data:
                     signals.append(json.loads(data))
+
             import datetime
             payload = {
                 "signals": signals,
                 "lastScanned": datetime.datetime.utcnow().isoformat()
             }
+
+            # Send whales data every 5 seconds to reduce payload bloat
+            if counter % 5 == 0:
+                whales = redis_client.zrevrange("whales:leaderboard", 0, 9, withscores=True)
+                whales_list = [{"wallet": w, "conviction": s} for w, s in whales]
+                payload["whales"] = whales_list
+
             await websocket.send_json(payload)
             await asyncio.sleep(1)  # Send updates every second
     except Exception as e:

@@ -24,11 +24,14 @@ from utils.time import now_ts
 from positions import PositionManager
 
 def normalize_trade(raw):
+    trade_value = float(raw["amount"]) * float(raw["price"])
+    if trade_value < 10:  # Skip dust trades to focus on whale activity
+        return None
     return {
-        "wallet": raw["maker"] if raw["side"] == "BUY" else raw["taker"],
-        "market_id": raw["condition_id"],
+        "proxyWallet": raw["maker"] if raw["side"] == "BUY" else raw["taker"],
+        "conditionId": raw["condition_id"],
         "outcome": "YES" if raw["outcome"] == 1 else "NO",
-        "shares": float(raw["amount"]),
+        "size": float(raw["amount"]),
         "price": float(raw["price"]),
         "side": raw["side"],
         "timestamp": raw["timestamp"],
@@ -59,6 +62,8 @@ class ArbitrageScraper:
                         self.r.set(last_ts_key, str(max_ts))
                         for trade in trades:
                             normalized = normalize_trade(trade)
+                            if normalized is None:
+                                continue
                             tx_hash = normalized["tx_hash"]
                             dedup_key = f"trade_dedup:{tx_hash}"
                             if not self.r.exists(dedup_key):

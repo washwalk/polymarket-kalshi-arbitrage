@@ -18,8 +18,14 @@ export interface ArbitrageSignal {
   };
 }
 
+export interface Whale {
+  wallet: string;
+  conviction: number;
+}
+
 interface ArbitrageState {
   signals: ArbitrageSignal[];
+  whales: Whale[];
   lastScanned: string | null;
   connected: boolean;
 }
@@ -28,6 +34,7 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/signals
 
 export function useArbitrage(): ArbitrageState {
   const [signals, setSignals] = useState<ArbitrageSignal[]>([]);
+  const [whales, setWhales] = useState<Whale[]>([]);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
 
@@ -49,21 +56,25 @@ export function useArbitrage(): ArbitrageState {
         setConnected(true);
       };
 
-      ws.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
+       ws.onmessage = (event) => {
+         try {
+           const payload = JSON.parse(event.data);
 
-          if (payload.signals) {
-            setSignals(payload.signals);
-          }
+           if (payload.signals) {
+             setSignals(payload.signals);
+           }
 
-          if (payload.lastScanned) {
-            setLastScanned(payload.lastScanned);
-          }
-        } catch (err) {
-          console.error('WS parse error', err);
-        }
-      };
+           if (payload.whales) {
+             setWhales(payload.whales);
+           }
+
+           if (payload.lastScanned) {
+             setLastScanned(payload.lastScanned);
+           }
+         } catch (err) {
+           console.error('WS parse error', err);
+         }
+       };
 
       ws.onclose = () => {
         setConnected(false);
@@ -85,5 +96,5 @@ export function useArbitrage(): ArbitrageState {
     };
   }, []);
 
-  return { signals, lastScanned, connected };
+  return { signals, whales, lastScanned, connected };
 }

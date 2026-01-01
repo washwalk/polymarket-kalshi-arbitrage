@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Any
 import time
+from decimal import Decimal
 
 class PositionManager:
     def __init__(self, redis_client):
@@ -11,8 +12,8 @@ class PositionManager:
         wallet = trade["proxyWallet"]
         market_id = trade["conditionId"]
         outcome = trade["outcome"]
-        shares = float(trade["size"])
-        price = float(trade["price"])
+        shares = Decimal(str(trade["size"]))
+        price = Decimal(str(trade["price"]))
         timestamp = int(trade["timestamp"])
 
         position_key = f"position:{wallet}:{market_id}:{outcome}"
@@ -21,10 +22,13 @@ class PositionManager:
         existing = self.r.get(position_key)
         if existing:
             position = json.loads(existing.decode('utf-8') if isinstance(existing, bytes) else existing)
+            # Convert to Decimal for calculations
+            position["net_shares"] = Decimal(position["net_shares"])
+            position["vwap"] = Decimal(position["vwap"])
         else:
             position = {
-                "net_shares": 0.0,
-                "vwap": 0.0,
+                "net_shares": Decimal('0'),
+                "vwap": Decimal('0'),
                 "first_seen_at": timestamp,
                 "last_updated_at": timestamp,
             }
@@ -46,14 +50,25 @@ class PositionManager:
             new_vwap = old_vwap
 
         position.update({
-            "net_shares": new_shares,
-            "vwap": new_vwap,
+            "net_shares": str(new_shares),
+            "vwap": str(new_vwap),
             "last_updated_at": timestamp,
         })
 
         # Store or delete position
-        if abs(new_shares) > 0.001:  # Keep if meaningful position
+        if abs(new_shares) > Decimal('0.001'):  # Keep if meaningful position
             self.r.set(position_key, json.dumps(position))
+
+            # Calculate conviction score
+            usd_size = abs(new_shares) * new_vwap
+            if usd_size >= Decimal('100'):  # Threshold to ignore small positions
+                hold_time_hours = (timestamp - position["first_seen_at"]) / 3600
+                conviction = (usd_size * Decimal('0.6')) + (Decimal(str(hold_time_hours)) * Decimal('0.4'))
+
+                # Update Redis ZSET for leaderboard (take max conviction per wallet)
+                current_score = self.r.zscore("whales:leaderboard", wallet)
+                if current_score is None or float(conviction) > current_score:
+                    self.r.zadd("whales:leaderboard", {wallet: float(conviction)})
         else:
             self.r.delete(position_key)
             # Could emit whale closed event here
@@ -63,7 +78,10 @@ class PositionManager:
         position_key = f"position:{wallet}:{market_id}:{outcome}"
         data = self.r.get(position_key)
         if data:
-            return json.loads(data.decode('utf-8') if isinstance(data, bytes) else data)
+            position = json.loads(data.decode('utf-8') if isinstance(data, bytes) else data)
+            position["net_shares"] = Decimal(position["net_shares"])
+            position["vwap"] = Decimal(position["vwap"])
+            return position
         return None
 
     def get_all_positions(self):
@@ -73,5 +91,8 @@ class PositionManager:
         for key in keys:
             data = self.r.get(key)
             if data:
-                positions[key.decode('utf-8')] = json.loads(data.decode('utf-8') if isinstance(data, bytes) else data)
+                position = json.loads(data.decode('utf-8') if isinstance(data, bytes) else data)
+                position["net_shares"] = Decimal(position["net_shares"])
+                position["vwap"] = Decimal(position["vwap"])
+                positions[key.decode('utf-8')] = position
         return positions
