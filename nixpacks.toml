@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "python3", "gcc", "gnumake", "pkg-config", "libusb1"]
+aptPkgs = ["gcc", "gnumake", "pkg-config", "libusb1"]
 
 [phases.install]
 cmds = ["npm ci", "pip install -r apps/bot/requirements.txt"]
