@@ -24,7 +24,7 @@ interface ArbitrageState {
   connected: boolean;
 }
 
-const WS_URL = 'ws://localhost:8000/ws/signals';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/signals';
 
 export function useArbitrage(): ArbitrageState {
   const [signals, setSignals] = useState<ArbitrageSignal[]>([]);
