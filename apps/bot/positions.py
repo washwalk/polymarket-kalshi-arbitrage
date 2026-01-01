@@ -27,33 +27,28 @@ class PositionManager:
                 "vwap": 0.0,
                 "first_seen_at": timestamp,
                 "last_updated_at": timestamp,
-                "total_volume": 0.0
             }
 
         # Update position
         old_shares = position["net_shares"]
         old_vwap = position["vwap"]
-        old_volume = position["total_volume"]
 
         # Determine if buy or sell based on side (assuming "BUY" or "SELL")
         is_buy = trade.get("side") == "BUY"
         shares_delta = shares if is_buy else -shares
 
         new_shares = old_shares + shares_delta
-        new_volume = old_volume + shares
 
-        # Update VWAP
-        if new_shares == 0:
-            new_vwap = 0.0
+        # Update VWAP only on BUY
+        if is_buy and shares > 0:
+            new_vwap = ((old_shares * old_vwap) + (shares * price)) / (old_shares + shares)
         else:
-            # VWAP = (old_volume * old_vwap + new_volume_at_price) / total_volume
-            new_vwap = ((old_volume * old_vwap) + (shares * price)) / new_volume
+            new_vwap = old_vwap
 
         position.update({
             "net_shares": new_shares,
             "vwap": new_vwap,
             "last_updated_at": timestamp,
-            "total_volume": new_volume
         })
 
         # Store or delete position

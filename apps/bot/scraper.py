@@ -23,6 +23,18 @@ from signals.confidence import confidence_score
 from utils.time import now_ts
 from positions import PositionManager
 
+def normalize_trade(raw):
+    return {
+        "wallet": raw["maker"] if raw["side"] == "BUY" else raw["taker"],
+        "market_id": raw["condition_id"],
+        "outcome": "YES" if raw["outcome"] == 1 else "NO",
+        "shares": float(raw["amount"]),
+        "price": float(raw["price"]),
+        "side": raw["side"],
+        "timestamp": raw["timestamp"],
+        "tx_hash": raw["transaction_hash"],
+    }
+
 class ArbitrageScraper:
     def __init__(self):
         self.r = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
@@ -38,14 +50,21 @@ class ArbitrageScraper:
                 total_trades = 0
                 for market in markets:
                     market_id = market["id"]
-                    trades = fetch_trades(market_id=market_id, limit=100)
-                    for trade in trades:
-                        tx_hash = trade["transactionHash"]
-                        dedup_key = f"trade_dedup:{tx_hash}"
-                        if not self.r.exists(dedup_key):
-                            self.r.set(dedup_key, "1", ex=1800)  # 30 min TTL
-                            self.position_manager.process_trade(trade)
-                            total_trades += 1
+                    last_ts_key = f"market:{market_id}:last_trade_ts"
+                    last_ts = self.r.get(last_ts_key)
+                    since = int(last_ts.decode('utf-8')) if last_ts else None
+                    trades = fetch_trades(market_id=market_id, limit=500, since=since)
+                    if trades:
+                        max_ts = max(t["timestamp"] for t in trades)
+                        self.r.set(last_ts_key, str(max_ts))
+                        for trade in trades:
+                            normalized = normalize_trade(trade)
+                            tx_hash = normalized["tx_hash"]
+                            dedup_key = f"trade_dedup:{tx_hash}"
+                            if not self.r.exists(dedup_key):
+                                self.r.set(dedup_key, "1", ex=1800)  # 30 min TTL
+                                self.position_manager.process_trade(normalized)
+                                total_trades += 1
                 if total_trades > 0:
                     logging.info(f"Processed {total_trades} new trades")
             except Exception as e:
