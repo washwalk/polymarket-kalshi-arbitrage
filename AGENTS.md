@@ -151,3 +151,7 @@ import { secondsAgo } from '@/utils/secondsAgo';
 - Tailwind CSS for styling
 - Solana wallet adapters for blockchain integration
 - Upstash Redis for client-side data fetching
+
+## Deployment
+
+See [RAILWAY_SETUP.md](RAILWAY_SETUP.md) for Railway deployment configuration, service architecture, and production setup instructions.
