@@ -29,8 +29,18 @@ scraper = ArbitrageScraper()
 
 @app.on_event("startup")
 async def startup_event():
-    # Start the scraper in background
-    asyncio.create_task(scraper.run_scraper())
+    logging.info("Bot starting up...")
+    try:
+        # Start the scraper in background
+        asyncio.create_task(scraper.run_scraper())
+        logging.info("Scraper initialized successfully")
+    except Exception as e:
+        logging.error(f"Startup failed: {e}")
+        raise  # Crash to show error in logs
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "arbitrage-bot", "port": int(os.getenv("PORT", 8000))}
 
 @app.get("/health")
 async def health_check():
