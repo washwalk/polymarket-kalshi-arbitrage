@@ -40,6 +40,7 @@ export function useArbitrage(): ArbitrageState {
     const connect = () => {
       if (!active) return;
 
+      console.log('Connecting to WS:', WS_URL);
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
 
