@@ -14,26 +14,55 @@ load_dotenv(dotenv_path='../.env')
 load_dotenv()  # Load from current dir to override
 
 from exchanges.kalshi_solana import get_client
-from exchanges.polymarket import fetch_markets, fetch_orderbook
+from exchanges.polymarket import fetch_markets, fetch_orderbook, fetch_trades
 from matching.fuzzy import match_score
 from signals.calculate import calculate_arb
 from signals.liquidity import has_min_liquidity
 from signals.slippage import effective_price
 from signals.confidence import confidence_score
 from utils.time import now_ts
+from positions import PositionManager
 
 class ArbitrageScraper:
     def __init__(self):
         self.r = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
         self.kalshi = get_client()
+        self.position_manager = PositionManager(self.r)
+
+    async def ingest_trades(self):
+        import logging
+        logging.info("Starting trade ingestion")
+        while True:
+            try:
+                markets = fetch_markets()
+                total_trades = 0
+                for market in markets:
+                    market_id = market["id"]
+                    trades = fetch_trades(market_id=market_id, limit=100)
+                    for trade in trades:
+                        tx_hash = trade["transactionHash"]
+                        dedup_key = f"trade_dedup:{tx_hash}"
+                        if not self.r.exists(dedup_key):
+                            self.r.set(dedup_key, "1", ex=1800)  # 30 min TTL
+                            self.position_manager.process_trade(trade)
+                            total_trades += 1
+                if total_trades > 0:
+                    logging.info(f"Processed {total_trades} new trades")
+            except Exception as e:
+                logging.error(f"Trade ingestion error: {e}")
+            await asyncio.sleep(60)  # Ingest every minute
 
     async def run_scraper(self):
         MIN_LIQUIDITY_USD = 25
         TRADE_SIZE_USD = 100
+        import logging
+        logging.info("Starting arbitrage scraper")
+        asyncio.create_task(self.ingest_trades())  # Start trade ingestion
 
         while True:
             poly_markets = fetch_markets()
             kalshi_markets = self.kalshi.get_markets()
+            logging.info(f"Fetched {len(poly_markets)} polymarkets, {len(kalshi_markets)} kalshi markets")
 
             for poly in poly_markets:
                 # Find best matching Kalshi market
@@ -90,6 +119,9 @@ class ArbitrageScraper:
                     "poly_price": poly_eff,
                     "kalshi_price": kalshi_eff,
                     **signal,
+                    "gross_cost": signal["gross_cost"],
+                    "net_profit": signal["net_profit"],
+                    "roi": signal["roi"],
                     "confidence": confidence,
                     "first_seen": first_seen,
                     "updated_at": now_ts(),
@@ -100,5 +132,7 @@ class ArbitrageScraper:
                 }
 
                 self.r.set(key, json.dumps(payload), ex=60)
+
+                logging.info(f"Stored arbitrage signal for {slug}")
 
             await asyncio.sleep(1.5)
