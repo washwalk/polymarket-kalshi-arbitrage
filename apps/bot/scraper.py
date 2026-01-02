@@ -7,7 +7,7 @@ import asyncio
 import json
 import time
 import os
-import redis
+from upstash_redis import Redis
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='../.env')
@@ -40,7 +40,14 @@ def normalize_trade(raw):
 
 class ArbitrageScraper:
     def __init__(self):
-        self.r = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
+        rest_url = os.environ.get("UPSTASH_REDIS_REST_URL")
+        rest_token = os.environ.get("UPSTASH_REDIS_REST_TOKEN")
+        if rest_url and rest_token:
+            self.r = Redis(url=rest_url, token=rest_token)
+        else:
+            # Fallback to local Redis if env vars not set
+            import redis
+            self.r = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
         self.kalshi = get_client()
         self.position_manager = PositionManager(self.r)
 

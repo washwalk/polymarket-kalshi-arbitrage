@@ -2,7 +2,7 @@ fastapi
 uvicorn
 websockets
 pydantic
-redis
+upstash-redis
 python-dotenv
 httpx
 py-clob-client
