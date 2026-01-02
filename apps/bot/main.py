@@ -31,10 +31,14 @@ async def startup_event():
     asyncio.create_task(scraper.run_scraper())
     logging.info("Bot startup: scraper task started")
 
-redis_client = Redis.from_url(
-    os.environ.get("REDIS_URL", "redis://localhost:6379"),
-    decode_responses=True
-)
+rest_url = os.environ.get("UPSTASH_REDIS_REST_URL")
+rest_token = os.environ.get("UPSTASH_REDIS_REST_TOKEN")
+if rest_url and rest_token:
+    redis_client = Redis(url=rest_url, token=rest_token)
+else:
+    # Fallback to local Redis if env vars not set
+    from redis import Redis as LocalRedis
+    redis_client = LocalRedis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
 
 scraper = ArbitrageScraper()
 
