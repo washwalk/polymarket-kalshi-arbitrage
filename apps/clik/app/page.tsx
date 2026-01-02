@@ -2,6 +2,26 @@
 import { useState, useEffect } from "react";
 import { useMetronome } from "@/features/clik/hooks/useMetronome";
 
+export const metadata = {
+  title: 'Clik Metronome | Wodah - Precision Timing Tools',
+  description: 'Free, minimal metronome app for musicians and traders. Features tap tempo, half/double BPM, and random muting for practice.',
+  keywords: 'metronome, timing tools, music, trading, precision',
+  openGraph: {
+    title: 'Clik Metronome - Wodah',
+    description: 'Precision timing tools for musicians and traders.',
+    url: 'https://wodah.com/clik',
+    siteName: 'Wodah',
+    images: [
+      {
+        url: 'https://wodah.com/og-clik.png',
+        width: 1200,
+        height: 630,
+        alt: 'Clik Metronome - Wodah',
+      },
+    ],
+  },
+};
+
 export default function ClikPage() {
   const { bpm, isRunning, start, stop, handleTapTempo, halfBpm, doubleBpm, handleRandomMuting, randomMuteProbability } = useMetronome();
   const [hint, setHint] = useState("SPACE = start");

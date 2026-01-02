@@ -8,6 +8,26 @@ import dynamic from 'next/dynamic';
 
 const Diffraction3D = dynamic(() => import('./components/Diffraction3D'), { ssr: false });
 
+export const metadata = {
+  title: 'Diffraction Simulator | Wodah - Interactive Physics Visualization',
+  description: 'Explore wave diffraction patterns with interactive 2D and 3D visualizations. Perfect for physics education and pattern analysis.',
+  keywords: 'diffraction, physics, wave patterns, visualization, education',
+  openGraph: {
+    title: 'Diffraction Simulator - Wodah',
+    description: 'Interactive physics visualization tool.',
+    url: 'https://wodah.com/diffraction',
+    siteName: 'Wodah',
+    images: [
+      {
+        url: 'https://wodah.com/og-diffraction.png',
+        width: 1200,
+        height: 630,
+        alt: 'Diffraction Simulator - Wodah',
+      },
+    ],
+  },
+};
+
 export default function DiffractionPage() {
     const [pattern, setPattern] = useState<number[][] | null>(null);
     const [aperture, setAperture] = useState<number[][] | null>(null);

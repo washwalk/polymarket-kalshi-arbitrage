@@ -8,23 +8,24 @@ const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
 export const metadata = {
     title: {
-        default: "Polymarket Kalshi Arbitrage",
-        template: "%s | Wodah Arbitrage",
+        default: "Arbitrage Tracker | Wodah - Real-Time Spread Detection",
+        template: "%s | Wodah",
     },
-    description: "Real-time arbitrage signals between Polymarket and Kalshi prediction markets.",
+    description: "Track live arbitrage opportunities between Polymarket and Kalshi. Get alerts on price spreads, ROI calculations, and whale movements.",
+    keywords: "prediction markets, arbitrage, Polymarket, Kalshi, trading signals",
     openGraph: {
-        title: "Polymarket Kalshi Arbitrage Dashboard",
-        description: "Real-time arbitrage signals between Polymarket and Kalshi prediction markets.",
-        url: "https://wodah.com",
-        siteName: "Wodah Arbitrage",
+        title: "Arbitrage Tracker - Wodah",
+        description: "Real-time spread detection for prediction market arbitrage.",
+        url: "https://wodah.com/arb",
+        siteName: "Wodah",
         locale: "en_US",
         type: "website",
         images: [
             {
-                url: "https://wodah.com/og-burner.png", // TODO: Update to arbitrage-specific image
+                url: "https://wodah.com/og-arb.png",
                 width: 1200,
                 height: 630,
-                alt: "Polymarket Kalshi Arbitrage Dashboard",
+                alt: "Arbitrage Tracker - Wodah",
             },
         ],
     },

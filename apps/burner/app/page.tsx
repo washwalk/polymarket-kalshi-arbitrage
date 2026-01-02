@@ -5,6 +5,26 @@ import { Lock, Zap, ShieldCheck, Fingerprint, AlertTriangle } from "lucide-react
 import { generateKey, exportKey, encryptText } from "@/features/burner/lib/crypto";
 import { coreToolsSEO } from "@/experiments.config";
 
+export const metadata = {
+  title: 'Secure Burner Links | Wodah - Encrypted Message Sharing',
+  description: 'Create self-destructing links for sensitive information. AES-256 encryption with 24-hour expiration. Perfect for sharing passwords, API keys, and confidential data.',
+  keywords: 'secure messaging, burner links, encryption, self-destructing messages',
+  openGraph: {
+    title: 'Burner Tool - Wodah',
+    description: 'Share secrets securely with burn-after-reading links.',
+    url: 'https://wodah.com/burner',
+    siteName: 'Wodah',
+    images: [
+      {
+        url: 'https://wodah.com/og-burner.png',
+        width: 1200,
+        height: 630,
+        alt: 'Burner Tool - Wodah',
+      },
+    ],
+  },
+};
+
 export default function Home() {
   const [text, setText] = useState("");
   const [link, setLink] = useState("");
