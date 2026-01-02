@@ -49,6 +49,10 @@ class ArbitrageScraper:
         logging.info("Starting trade ingestion")
         while True:
             try:
+                # Skip ingestion if Redis not available
+                if not hasattr(self.r, 'ping'):
+                    await asyncio.sleep(60)
+                    continue
                 # Polymarket trades
                 poly_markets = fetch_markets()
                 total_trades = 0

@@ -1,5 +1,6 @@
 import os
 import requests
+import logging
 from solders.keypair import Keypair
 from solana.rpc.api import Client
 
@@ -9,8 +10,13 @@ class KalshiClient:
     def __init__(self):
         private_key = os.environ.get("SOLFLARE_PRIVATE_KEY") or os.environ.get("SOLANA_PRIVATE_KEY")
         if private_key:
-            self.keypair = Keypair.from_base58_string(private_key)
-            self.rpc_client = Client(os.environ.get("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com"))
+            try:
+                self.keypair = Keypair.from_base58_string(private_key)
+                self.rpc_client = Client(os.environ.get("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com"))
+            except ValueError as e:
+                logging.warning(f"Invalid Solana private key: {e}. Running in read-only mode.")
+                self.keypair = None
+                self.rpc_client = None
         else:
             self.keypair = None
             self.rpc_client = None
