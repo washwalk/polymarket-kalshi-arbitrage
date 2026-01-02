@@ -4,12 +4,12 @@ This document explains the Railway deployment architecture for the Wodah applica
 
 ## Architecture Overview
 
-The application is deployed as two independent Railway services from the same repository:
+The application is deployed as two Railway services from the monorepo:
 
-- **Web Service** (`apps/web`): Next.js frontend displaying real-time arbitrage opportunities
-- **Bot Service** (`apps/bot`): FastAPI backend running the arbitrage scraper and WebSocket server
+- **Frontend Service** (`apps/main-site`): Consolidated Next.js app with routing to all landing pages (/whales, /arb, /burner, etc.)
+- **Bot Service** (`apps/bot`): FastAPI backend for data processing and WebSocket server
 
-This separation prevents memory conflicts (OOM errors) by giving each service its own 1GB RAM allocation and allows independent scaling and debugging.
+This setup uses subdirectory routing on wodah.com for different tools, with shared packages for common code. The bot uses the api.wodah.com subdomain.
 
 ### Service Communication
 
@@ -51,14 +51,14 @@ This separation prevents memory conflicts (OOM errors) by giving each service it
 
 ## Build Configuration
 
-Both services use Railpack with the following `nixpacks.toml`:
+All services use Railpack. For Next.js apps, use the default configuration. For the bot service, use:
 
 ```toml
 [phases.setup]
 aptPkgs = ["gcc", "gnumake", "pkg-config", "libusb1"]
 
 [phases.install]
-cmds = ["npm ci", "pip install -r apps/bot/requirements.txt"]
+cmds = ["pip install -r apps/bot/requirements.txt"]
 
 [variables]
 PYTHON = "python3"
@@ -67,13 +67,13 @@ PKG_CONFIG_PATH = "/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
 
 ## Step-by-Step Setup
 
-### 1. Create the Web Service
+### 1. Create the Frontend Service
 
 1. In Railway dashboard, click **+ New > GitHub Repo**
 2. Select your `wodah` repository
 3. Go to **Settings** tab
-4. Set **Root Directory** to `/apps/web`
-5. Add **Watch Paths**: `/apps/web/**`
+4. Set **Root Directory** to `/apps/main-site`
+5. Add **Watch Paths**: `/apps/**`, `/packages/**`
 6. In **Variables** tab, add `NEXT_PUBLIC_WS_URL=wss://api.wodah.com/ws/signals`
 7. Add custom domain `wodah.com`
 
@@ -84,15 +84,15 @@ PKG_CONFIG_PATH = "/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
 3. Rename the service to `wodah-bot`
 4. Set **Root Directory** to `/apps/bot`
 5. Add **Watch Paths**: `/apps/bot/**`
-6. In **Variables** tab, add required environment variables
+6. In **Variables** tab, add required environment variables: `PORT=8000`, Redis URLs, API keys
 7. Add custom domain `api.wodah.com`
 
 ### 3. DNS Configuration
 
 For each custom domain, Railway provides a CNAME value. Add these records to your domain registrar:
 
-- **wodah.com**: CNAME to Railway's provided value
-- **api.wodah.com**: CNAME to Railway's provided value
+- **wodah.com**: CNAME to Railway's provided value (frontend service)
+- **api.wodah.com**: CNAME to Railway's provided value (bot service)
 
 ## Networking Details
 
@@ -101,12 +101,12 @@ For each custom domain, Railway provides a CNAME value. Add these records to you
 - Bot service: Runs on port 8000 (set via `PORT` environment variable)
 
 ### CORS Configuration
-The bot service allows requests from the web domain. Update `apps/bot/main.py`:
+The bot service allows requests from all app domains. Update `apps/bot/main.py`:
 
 ```python
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://wodah.com", "https://www.wodah.com"],
+    allow_origins=["https://wodah.com", "https://whales.wodah.com", "https://burner.wodah.com", "*"],  # Add all app domains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

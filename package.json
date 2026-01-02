@@ -1,7 +1,24 @@
 {
   "private": true,
-  "workspaces": ["apps/*"],
+  "packageManager": "npm@9.2.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "start": "npm run build --workspace=apps/web && npm run start --workspace=apps/web"
+    "start": "npm run build --workspace=apps/web && npm run start --workspace=apps/web",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "pwa": "turbo pwa"
+  },
+  "devDependencies": {
+    "turbo": "^2.7.2",
+    "typescript": "^5.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "next-pwa": "^5.6.0",
+    "@types/node": "^20.11.0"
   }
 }

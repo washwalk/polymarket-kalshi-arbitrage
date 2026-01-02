@@ -4,9 +4,21 @@ This file contains guidelines for agentic coding agents working in this reposito
 
 ## Project Structure
 
-This is a monorepo with two main applications:
+This is a Turborepo monorepo with multiple Next.js applications and a Python backend:
+
+### Apps
+- `apps/arb-tracker/` - Next.js app for arbitrage tracking (uses @upstash/redis)
+- `apps/burner/` - Next.js app with encryption features (uses framer-motion)
+- `apps/clik/` - Next.js app with metronome functionality
+- `apps/diffraction/` - Next.js app with 3D diffraction visualization (@react-three/fiber, three.js)
+- `apps/main-site/` - Main Next.js website with Solana wallet integration (@solana/wallet-adapter-react)
+- `apps/web/` - Original Next.js frontend for arbitrage display
+- `apps/whale-watch/` - Next.js app for whale watching/tracking
 - `apps/bot/` - Python FastAPI backend for arbitrage signal generation
-- `apps/web/` - Next.js TypeScript frontend for displaying arbitrage opportunities
+
+### Packages
+- `packages/api/` - Shared TypeScript API utilities (@upstash/redis)
+- `packages/ui/` - Shared React UI components (class-variance-authority, clsx, tailwind-merge, lucide-react)
 
 ## Build Commands
 
@@ -15,7 +27,17 @@ This is a monorepo with two main applications:
 # Install dependencies for all workspaces
 npm install
 
-# Start development servers (run from respective app directories)
+# Start development servers for all apps
+npm run dev
+
+# Build all apps
+npm run build
+
+# Lint all apps
+npm run lint
+
+# Typecheck all apps
+npm run typecheck
 ```
 
 ### Backend (Python) - apps/bot/
@@ -30,9 +52,9 @@ python main.py
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Frontend (Next.js) - apps/web/
+### Frontend (Next.js) - Individual Apps
 ```bash
-# Install dependencies
+# Install dependencies (if not done at root)
 npm install
 
 # Development server
@@ -144,13 +166,16 @@ import { secondsAgo } from '@/utils/secondsAgo';
 - Redis for caching
 - kalshi-python and py-clob-client for exchange APIs
 - thefuzz for fuzzy matching
+- tweepy for Twitter integration
 
 ### Frontend
-- Next.js 14 with App Router
+- Next.js 15 with App Router
 - TypeScript with strict mode
 - Tailwind CSS for styling
 - Solana wallet adapters for blockchain integration
 - Upstash Redis for client-side data fetching
+- Framer Motion for animations
+- React Three Fiber and Drei for 3D visualizations
 
 ## Deployment
 

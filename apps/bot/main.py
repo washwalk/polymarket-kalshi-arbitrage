@@ -7,6 +7,7 @@ from upstash_redis import Redis
 from scraper import ArbitrageScraper
 import uvicorn
 import logging
+import tweepy
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,17 +20,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Global scraper instance
-scraper = None
-
-@app.on_event("startup")
-async def startup_event():
-    global scraper
-    logging.info("Bot startup: initializing scraper")
-    scraper = ArbitrageScraper()
-    asyncio.create_task(scraper.run_scraper())
-    logging.info("Bot startup: scraper task started")
 
 rest_url = os.environ.get("UPSTASH_REDIS_REST_URL")
 rest_token = os.environ.get("UPSTASH_REDIS_REST_TOKEN")
@@ -74,10 +64,10 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             counter += 1
             # Get all arbitrage signals from Redis
-            keys = redis_client.keys('arb:*')
+            keys = await redis_client.keys('arb:*')
             signals = []
             for key in keys:
-                data = redis_client.get(key)
+                data = await redis_client.get(key)
                 if data:
                     signals.append(json.loads(data))
 
@@ -90,15 +80,15 @@ async def websocket_endpoint(websocket: WebSocket):
             # Send whales data every 5 seconds to reduce payload bloat
             if counter % 5 == 0:
                 try:
-                    whales = redis_client.zrevrange("whales:leaderboard", 0, 9, withscores=True)
+                    whales = await redis_client.zrevrange("whales:leaderboard", 0, 9, withscores=True)
                     whales_list = []
                     for w, s in whales:
                         # Get position count and total USD for wallet
-                        positions = redis_client.keys(f"position:{w}:*")
+                        positions = await redis_client.keys(f"position:{w}:*")
                         position_count = len(positions) if positions else 0
                         usd_size = 0
                         for pos_key in positions:
-                            pos_data = redis_client.get(pos_key)
+                            pos_data = await redis_client.get(pos_key)
                             if pos_data:
                                 pos = json.loads(pos_data if isinstance(pos_data, str) else pos_data.decode('utf-8'))
                                 shares = abs(float(pos['shares']))
