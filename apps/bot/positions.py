@@ -95,8 +95,9 @@ class PositionManager:
         for key in keys:
             data = self.r.get(key)
             if data:
-            position = json.loads(data if isinstance(data, str) else data.decode('utf-8'))
+                position = json.loads(data if isinstance(data, str) else data.decode('utf-8'))
                 position["net_shares"] = Decimal(position["net_shares"])
                 position["vwap"] = Decimal(position["vwap"])
+                positions[key if isinstance(key, str) else key.decode('utf-8')] = position
                 positions[key if isinstance(key, str) else key.decode('utf-8')] = position
         return positions
