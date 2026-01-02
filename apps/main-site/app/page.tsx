@@ -1,4 +1,5 @@
 import { Shield, Zap, BarChart3, Lock, Users, Award } from "lucide-react";
+import ToolGrid from "@/components/ToolGrid";
 
 export default function HomePage() {
   return (
@@ -19,17 +20,17 @@ export default function HomePage() {
             Professional tools for prediction market arbitrage and whale tracking.
             Real-time signals, secure encryption, and data-driven insights.
           </p>
+        </div>
+      </section>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <a href="/arb" className="bg-emerald-600 hover:bg-emerald-700 px-8 py-4 rounded-lg font-semibold text-lg transition-colors inline-flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              Arbitrage Tracker
-            </a>
-            <a href="/whales" className="border border-gray-600 hover:border-gray-400 px-8 py-4 rounded-lg font-semibold text-lg transition-colors inline-flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Whale Watcher
-            </a>
+      {/* Tools Section */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Tools</h2>
+            <p className="text-gray-400 text-lg">Cutting-edge tools for prediction market traders</p>
           </div>
+          <ToolGrid />
         </div>
       </section>
 

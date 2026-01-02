@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    basePath: '/arb',
+    assetPrefix: '/arb',
 
     async rewrites() {
         return [
