@@ -24,14 +24,14 @@ from utils.time import now_ts
 from positions import PositionManager
 
 def normalize_trade(raw):
-    trade_value = float(raw["amount"]) * float(raw["price"])
+    trade_value = float(raw["size"]) * float(raw["price"])
     if trade_value < 10:  # Skip dust trades to focus on whale activity
         return None
     return {
         "proxyWallet": raw["maker"] if raw["side"] == "BUY" else raw["taker"],
         "conditionId": raw["condition_id"],
         "outcome": "YES" if raw["outcome"] == 1 else "NO",
-        "size": float(raw["amount"]),
+        "size": float(raw["size"]),
         "price": float(raw["price"]),
         "side": raw["side"],
         "timestamp": raw["timestamp"],
@@ -67,7 +67,7 @@ class ArbitrageScraper:
                     market_id = market["id"]
                     last_ts_key = f"market:{market_id}:last_trade_ts"
                     last_ts = self.r.get(last_ts_key)
-                    since = int(last_ts.decode('utf-8')) if last_ts else None
+                    since = int(last_ts) if last_ts else None
                     trades = fetch_trades(market_id=market_id, limit=500, since=since)
                     if trades:
                         max_ts = max(t["timestamp"] for t in trades)
@@ -161,7 +161,7 @@ class ArbitrageScraper:
 
                 first_seen = now_ts()
                 if existing:
-                    data = existing.decode('utf-8') if isinstance(existing, bytes) else existing
+                    data = existing if isinstance(existing, str) else existing.decode('utf-8')
                     first_seen = json.loads(data)["first_seen"]
 
                 age = now_ts() - first_seen
