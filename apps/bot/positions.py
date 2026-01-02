@@ -21,7 +21,7 @@ class PositionManager:
         # Get existing position
         existing = self.r.get(position_key)
         if existing:
-            position = json.loads(existing.decode('utf-8') if isinstance(existing, bytes) else existing)
+            position = json.loads(existing if isinstance(existing, str) else existing.decode('utf-8'))
             # Convert to Decimal for calculations
             position["net_shares"] = Decimal(position["net_shares"])
             position["vwap"] = Decimal(position["vwap"])
@@ -82,7 +82,7 @@ class PositionManager:
         position_key = f"position:{wallet}:{market_id}:{outcome}"
         data = self.r.get(position_key)
         if data:
-            position = json.loads(data.decode('utf-8') if isinstance(data, bytes) else data)
+                position = json.loads(data if isinstance(data, str) else data.decode('utf-8'))
             position["net_shares"] = Decimal(position["net_shares"])
             position["vwap"] = Decimal(position["vwap"])
             return position
@@ -95,8 +95,8 @@ class PositionManager:
         for key in keys:
             data = self.r.get(key)
             if data:
-                position = json.loads(data.decode('utf-8') if isinstance(data, bytes) else data)
+            position = json.loads(data if isinstance(data, str) else data.decode('utf-8'))
                 position["net_shares"] = Decimal(position["net_shares"])
                 position["vwap"] = Decimal(position["vwap"])
-                positions[key.decode('utf-8')] = position
+                positions[key if isinstance(key, str) else key.decode('utf-8')] = position
         return positions
