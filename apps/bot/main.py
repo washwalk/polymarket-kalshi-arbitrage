@@ -70,7 +70,25 @@ async def websocket_endpoint(websocket: WebSocket):
             # Send whales data every 5 seconds to reduce payload bloat
             if counter % 5 == 0:
                 whales = redis_client.zrevrange("whales:leaderboard", 0, 9, withscores=True)
-                whales_list = [{"wallet": w, "conviction": s} for w, s in whales]
+                whales_list = []
+                for w, s in whales:
+                    # Get position count and total USD for wallet
+                    positions = redis_client.keys(f"position:{w}:*")
+                    position_count = len(positions) if positions else 0
+                    usd_size = 0
+                    for pos_key in positions:
+                        pos_data = redis_client.get(pos_key)
+                        if pos_data:
+                            pos = json.loads(pos_data.decode('utf-8'))
+                            shares = abs(float(pos['shares']))
+                            vwap = float(pos['vwap'])
+                            usd_size += shares * vwap
+                    whales_list.append({
+                        "wallet": w,
+                        "conviction": s,
+                        "positionCount": position_count,
+                        "usdSize": usd_size
+                    })
                 payload["whales"] = whales_list
 
             await websocket.send_json(payload)

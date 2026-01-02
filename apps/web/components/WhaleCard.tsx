@@ -17,6 +17,9 @@ export function WhaleCard({ whale }: Props) {
       <div className="mt-2 text-sm text-gray-300">
         Conviction Score
       </div>
+      <div className="mt-1 text-xs text-gray-400">
+        Positions: {whale.positionCount} | USD: ${whale.usdSize.toFixed(0)}
+      </div>
     </div>
   );
 }

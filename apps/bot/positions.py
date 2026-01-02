@@ -63,7 +63,11 @@ class PositionManager:
             usd_size = abs(new_shares) * new_vwap
             if usd_size >= Decimal('100'):  # Threshold to ignore small positions
                 hold_time_hours = (timestamp - position["first_seen_at"]) / 3600
-                conviction = (usd_size * Decimal('0.6')) + (Decimal(str(hold_time_hours)) * Decimal('0.4'))
+                # Count total positions for this wallet
+                wallet_positions = self.r.keys(f"position:{wallet}:*")
+                position_count = len(wallet_positions) if wallet_positions else 1
+                # Enhanced conviction: USD size (40%), hold time (30%), position diversity (20%), recency bonus (10%)
+                conviction = (usd_size * Decimal('0.4')) + (Decimal(str(hold_time_hours)) * Decimal('0.3')) + (Decimal(position_count) * Decimal('0.2')) + (Decimal('1') if hold_time_hours > 24 else Decimal('0')) * Decimal('0.1')
 
                 # Update Redis ZSET for leaderboard (take max conviction per wallet)
                 current_score = self.r.zscore("whales:leaderboard", wallet)

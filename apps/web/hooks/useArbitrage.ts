@@ -21,6 +21,8 @@ export interface ArbitrageSignal {
 export interface Whale {
   wallet: string;
   conviction: number;
+  positionCount: number;
+  usdSize: number;
 }
 
 interface ArbitrageState {

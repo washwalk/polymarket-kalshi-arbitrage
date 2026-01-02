@@ -29,5 +29,11 @@ class KalshiClient:
         # TODO: Query Solana for token prices (e.g., via Raydium or market contract)
         return {"asks": [{"price": 0.5, "size": 100}]}  # Dummy data
 
+    def fetch_trades(self, market_id=None, limit=1000, offset=0, since=None):
+        # Placeholder: Kalshi trades from Solana blockchain
+        # TODO: Query Solana transactions for market trades
+        # For now, return empty list
+        return []  # Dummy data
+
 def get_client():
     return KalshiClient()

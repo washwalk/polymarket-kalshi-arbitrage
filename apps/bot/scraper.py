@@ -49,9 +49,10 @@ class ArbitrageScraper:
         logging.info("Starting trade ingestion")
         while True:
             try:
-                markets = fetch_markets()
+                # Polymarket trades
+                poly_markets = fetch_markets()
                 total_trades = 0
-                for market in markets:
+                for market in poly_markets:
                     market_id = market["id"]
                     last_ts_key = f"market:{market_id}:last_trade_ts"
                     last_ts = self.r.get(last_ts_key)
@@ -70,6 +71,23 @@ class ArbitrageScraper:
                                 self.r.set(dedup_key, "1", ex=1800)  # 30 min TTL
                                 self.position_manager.process_trade(normalized)
                                 total_trades += 1
+
+                # Kalshi trades (placeholder)
+                kalshi_markets = self.kalshi.get_markets()
+                for market in kalshi_markets:
+                    market_id = market["id"]
+                    trades = self.kalshi.fetch_trades(market_id=market_id, limit=500)
+                    for trade in trades:
+                        normalized = normalize_trade(trade)  # Assuming same format
+                        if normalized is None:
+                            continue
+                        tx_hash = normalized["tx_hash"]
+                        dedup_key = f"trade_dedup:{tx_hash}"
+                        if not self.r.exists(dedup_key):
+                            self.r.set(dedup_key, "1", ex=1800)
+                            self.position_manager.process_trade(normalized)
+                            total_trades += 1
+
                 if total_trades > 0:
                     logging.info(f"Processed {total_trades} new trades")
             except Exception as e:

@@ -1,6 +1,6 @@
 # Railway Setup Guide
 
-This document explains the Railway deployment architecture for the Polymarket-Kalshi Arbitrage application, using an "Isolated Monorepo" setup with separate services for optimal performance and resource isolation.
+This document explains the Railway deployment architecture for the Wodah application, using an "Isolated Monorepo" setup with separate services for optimal performance and resource isolation.
 
 ## Architecture Overview
 
@@ -70,7 +70,7 @@ PKG_CONFIG_PATH = "/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
 ### 1. Create the Web Service
 
 1. In Railway dashboard, click **+ New > GitHub Repo**
-2. Select your `polymarket-kalshi-arbitrage` repository
+2. Select your `wodah` repository
 3. Go to **Settings** tab
 4. Set **Root Directory** to `/apps/web`
 5. Add **Watch Paths**: `/apps/web/**`
