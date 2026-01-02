@@ -82,7 +82,7 @@ class PositionManager:
         position_key = f"position:{wallet}:{market_id}:{outcome}"
         data = self.r.get(position_key)
         if data:
-                position = json.loads(data if isinstance(data, str) else data.decode('utf-8'))
+            position = json.loads(data if isinstance(data, str) else data.decode('utf-8'))
             position["net_shares"] = Decimal(position["net_shares"])
             position["vwap"] = Decimal(position["vwap"])
             return position
