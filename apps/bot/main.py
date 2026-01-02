@@ -99,8 +99,8 @@ async def websocket_endpoint(websocket: WebSocket):
                         usd_size = 0
                         for pos_key in positions:
                             pos_data = redis_client.get(pos_key)
-                        if pos_data:
-                            pos = json.loads(pos_data if isinstance(pos_data, str) else pos_data.decode('utf-8'))
+                            if pos_data:
+                                pos = json.loads(pos_data if isinstance(pos_data, str) else pos_data.decode('utf-8'))
                                 shares = abs(float(pos['shares']))
                                 vwap = float(pos['vwap'])
                                 usd_size += shares * vwap
