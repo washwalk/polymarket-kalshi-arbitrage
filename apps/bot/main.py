@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
 import os
-from redis import Redis
+from upstash_redis import Redis
 from scraper import ArbitrageScraper
 import uvicorn
 import logging
